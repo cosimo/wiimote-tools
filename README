@@ -9,30 +9,43 @@ URL:           http://github.com/cosimo/wiimote-tools
 A small set of simple and funny scripts that are
 meant to be used with a Nintendo Wiimote controller.
 
+== REQUIREMENTS ==
 
-* wiimote-conductor
+* perl 5.8+
 
-    Can control the speed of a movie or song by pretending to
-    use the wiimote like a orchestra conductor would.
+* libcwiimote
+  (install with 'sudo apt-get install libcwiimote-dev'
+  if you're using Debian/Ubuntu)
 
-    It's a bit sucky because it doesn't get the actual tempo
-    from the sound, so you have to pretend the normal (1.0x) speed
-    is represented by wii-beats distanced by 1 second.
+* the Linux::Input::Wiimote perl module
+  (install with 'sudo cpan Linux::Input::Wiimote')
 
-    So if you want to double the speed of the movie/song, you
-    have to move the wii in the air every 0.5 seconds.
+== INSTRUCTIONS ==
 
-    Pretty lame, eh? :)
+All the scripts below will wait for the wiimote to be put
+in discoverable mode when they start.
 
-    Requires 'Audio::Play::MPlayer' with a patch to add
-    the 'speed' command.
+So, run any of the scripts like the following:
+
+  ./wiimote-joystick
+
+and then press both the '1' and '2' keys together
+on the wiimote. This will usually cause the script to
+connect to the wiimote. You will see leds blinking.
+
+The script is connected. Do something. Press random
+buttons or pretend you're playing drums. Something should
+happen... :-)
+
+
+== DESCRIPTION ==
 
 * wiimote-drumkit
 
     This is something I made for my small kids, so they could
     just play with sounds. You can write a small config file to
     assign random mp3s/wav/... to each button of the wii.
- 
+
     Take a look at drumkit.conf or animals.conf as examples.
 
     Then each time you press a button, or wave the wii in the air
@@ -55,4 +68,21 @@ meant to be used with a Nintendo Wiimote controller.
     because of the way the keys are sent to X11.
 
     Requires 'X11::GUITest', install with 'sudo cpan X11::GUITest'.
+
+* wiimote-conductor
+
+    Can control the speed of a movie or song by pretending to
+    use the wiimote like a orchestra conductor would.
+
+    It's a bit sucky because it doesn't get the actual tempo
+    from the sound, so you have to pretend the normal (1.0x) speed
+    is represented by wii-beats distanced by 1 second.
+
+    So if you want to double the speed of the movie/song, you
+    have to move the wii in the air every 0.5 seconds.
+
+    Pretty lame, eh? :)
+
+    Requires 'Audio::Play::MPlayer' with a patch to add
+    the 'speed' command.
 
