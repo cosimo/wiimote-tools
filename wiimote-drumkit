@@ -1,0 +1,94 @@
+#!/usr/bin/env perl
+
+BEGIN { $| = 1 }
+
+use strict;
+use warnings;
+use wiimote;
+
+wiimote::init() or die "Can't init wiimote connection";
+
+# Avoid zombie player processes
+$SIG{CHLD} = 'IGNORE';
+
+my $dump_keys = 0;
+my $dump_motion = 1;
+
+my %sample_type = (
+	A     => 'animals/cows',
+#	B     => 'synth',
+	'-'   => 'animals/birds',
+	'+'   => 'animals/dogs',
+	'home'=> 'animals/cats',
+	'*tiltz1' => 'cymbals',
+);
+
+my @sound_keys = keys %sample_type;
+my %avoid_play = map { $_ => 0 } @sound_keys;
+
+{
+
+	my %samples = map
+		{ $_ => [ glob "samples/$_/*.*" ] }
+		values %sample_type;
+
+	sub choose_sample {
+		my ($type) = @_;
+		$type ||= 'drums';
+
+		my $sample_library = $samples{$type};
+		my $random_sample = $sample_library->[rand @{ $sample_library }];
+
+		return $random_sample;
+	}
+
+}
+
+# Fork a pulse audio player in background
+# Can play unlimited sounds together in this way :)
+sub play_sample_paplay {
+	my ($sample) = @_;
+	return if my $pid = fork();
+	exec(paplay => $sample);
+}
+
+while (my $keys = wiimote::get_keys()) {
+
+	if ($dump_keys) {
+		print "\r";
+		print $keys->{left}  ? "L" : " ";
+		print $keys->{right} ? "R" : " ";
+		print $keys->{down}  ? "D" : " ";
+		print $keys->{up}    ? "U" : " ";
+		print $keys->{A}     ? "A" : " ";
+		print $keys->{B}     ? "B" : " ";
+		print $keys->{home}  ? "H" : " ";
+		print $keys->{1}     ? "1" : " ";
+		print $keys->{2}     ? "2" : " ";
+		print $keys->{'+'}   ? "+" : " ";
+		print $keys->{'-'}   ? "-" : " ";
+	}
+
+	for my $key (@sound_keys) {
+		next if $key =~ m{\*};    # Fake motion-bound keys
+		if (($avoid_play{$key}-- <= 0) and $keys->{$key}) {
+			play_sample_paplay(choose_sample($sample_type{$key}));
+			$avoid_play{$key} = 10;
+		}
+	}
+
+	# Get acceleration
+	my $mtn = wiimote::get_motion();
+
+	if ($mtn->{tilt_z} > 4) {
+		#play_sample_paplay(choose_sample('drums'));
+		play_sample_paplay(choose_sample('cymbals'));
+	}
+
+	#if ($dump_motion) {
+	#		use Data::Dumper;
+	#	print Dumper($mtn), "\n";
+	#}
+
+}
+

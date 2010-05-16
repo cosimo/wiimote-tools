@@ -1,0 +1,59 @@
+#!/usr/bin/env perl
+
+BEGIN { $| = 1 }
+
+use strict;
+use warnings;
+use Audio::Play::MPlayer;
+use Time::HiRes;
+use wiimote;
+
+use constant FORCE_THRESHOLD => 2.0;
+
+my $player = Audio::Play::MPlayer->new();
+my $curr_speed = 1.0;
+my $beat_prev = [ Time::HiRes::gettimeofday ];
+my $beat_time;
+my $beat_now;
+my $debounce = 0;
+
+wiimote::init() or die "Can't init wiimote connection";
+
+$player->load('your-movie-music-file-here');
+
+while (my $motion = wiimote::get_motion()) {
+
+	if ($debounce-- <= 0 and $motion->{tilt_z} >= FORCE_THRESHOLD) {
+
+		$beat_now = [ Time::HiRes::gettimeofday ];
+
+		if (not defined $beat_prev) {
+			$beat_time = undef;
+		}
+		else {
+			$beat_time = Time::HiRes::tv_interval($beat_prev, $beat_now);
+		}
+
+		print "this_beat: ", $beat_time, "s  speed: $curr_speed  ";
+
+		$beat_prev = $beat_now;
+
+		if ($beat_time > 0.2 and $beat_time < 5.0) {
+			my $new_speed = (1.0 / $beat_time);
+			$new_speed = sprintf "%.1f", $new_speed;
+			my $speed_delta = $new_speed - $curr_speed;
+			print " newspeed: $new_speed  dx: $speed_delta ";
+			$player->speed($speed_delta);
+			$player->poll(0.01);
+			$curr_speed = $new_speed;
+		}
+
+		$debounce = 10;
+	}
+
+	print "                                \r";
+
+	Time::HiRes::usleep(10000);
+
+}
+

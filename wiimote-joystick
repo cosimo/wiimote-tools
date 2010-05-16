@@ -1,0 +1,89 @@
+#!/usr/bin/env perl
+#
+# Map the wiimote controls to simulate a digital joystick
+#
+# Cosimo, 15/05/2010
+#
+
+BEGIN {
+	$| = 1
+}
+
+#se strict;
+#se warnings;
+
+use Time::HiRes  ();
+use X11::GUITest ();
+use wiimote;
+
+use constant {
+	POLL_DELAY => 50,
+	POLL_EVERY_CYCLES => 10,
+	DEBOUNCE_FACTOR => 5,
+};
+
+wiimote::init() or die "Can't init wiimote connection";
+
+print 'Connected to Wiimote. Waiting for events...', "\n";
+
+#my @progress = ('-', '\\', '|', '/');
+#my $next = 0;
+
+my %anti_bounce;
+my $buttons;
+my %wii_to_x11 = (
+	left => '{UP}',
+	right => '{DOW}',
+	down => '{LEF}',
+	up => '{RIG}',
+	'+' => '5',
+	'A' => '1',
+	'1' => '^',
+	'2' => '^',
+);
+
+my $batch;
+my $noop_cycles = 0;
+
+while ('to infinity and beyond') {
+
+	if ($noop_cycles-- > 0) {
+		Time::HiRes::usleep(POLL_DELAY);
+		next;
+	}
+
+	$noop_cycles = POLL_EVERY_CYCLES;
+
+	wiimote::poll();
+
+	$buttons = wiimote::get_keys();
+
+	#print "\r";
+	#print $keys->{left}  ? "L" : " ";
+	#print $keys->{right} ? "R" : " ";
+	#print $keys->{down}  ? "D" : " ";
+	#print $keys->{up}    ? "U" : " ";
+	#print $keys->{A}     ? "A" : " ";
+	#print $keys->{B}     ? "B" : " ";
+	#print $keys->{home}  ? "H" : " ";
+	#print $keys->{1}     ? "1" : " ";
+	#print $keys->{2}     ? "2" : " ";
+	#print $keys->{'+'}   ? "+" : " ";
+	#print $keys->{'-'}   ? "-" : " ";
+	#print " ", $progress[$next++ % @progress], "                                                     ";
+
+	for my $pressed (keys %{ $buttons }) {
+
+		next if $anti_bounce{$pressed}-- > 0;
+		$anti_bounce{$pressed} = DEBOUNCE_FACTOR;
+
+		my $x11_key = $wii_to_x11{$pressed} or next;
+		#print " $batch ";
+		X11::GUITest::SendKeys($x11_key);
+	}
+
+	#my $t0 = [Time::HiRes::gettimeofday];
+	#print "elapsed " . Time::HiRes::tv_interval($t0) . " s         \r";
+
+}
+
