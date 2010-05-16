@@ -1,0 +1,58 @@
+=====================================================
+wiimote-tools
+-----------------------------------------------------
+Author:        cosimo@cpan.org
+First version: 14/5/2010
+URL:           http://github.com/cosimo/wiimote-tools
+=====================================================
+
+A small set of simple and funny scripts that are
+meant to be used with a Nintendo Wiimote controller.
+
+
+* wiimote-conductor
+
+    Can control the speed of a movie or song by pretending to
+    use the wiimote like a orchestra conductor would.
+
+    It's a bit sucky because it doesn't get the actual tempo
+    from the sound, so you have to pretend the normal (1.0x) speed
+    is represented by wii-beats distanced by 1 second.
+
+    So if you want to double the speed of the movie/song, you
+    have to move the wii in the air every 0.5 seconds.
+
+    Pretty lame, eh? :)
+
+    Requires 'Audio::Play::MPlayer' with a patch to add
+    the 'speed' command.
+
+* wiimote-drumkit
+
+    This is something I made for my small kids, so they could
+    just play with sounds. You can write a small config file to
+    assign random mp3s/wav/... to each button of the wii.
+ 
+    Take a look at drumkit.conf or animals.conf as examples.
+
+    Then each time you press a button, or wave the wii in the air
+    (pretending you're playing drums), you will hear the corresponding
+    sounds.
+
+    Requires 'paplay'.
+
+* wiimote-joystick
+
+    This is a quick hack that I put together to use the wiimote
+    together with any of my favorite games as a digital joystick.
+
+    I can use it to play with mame, of course with legal roms
+    or c64 emulators (with games I of course owned when I was a kid)
+    and so on.
+
+    Currently it works well with a few games, because of the way the
+    keys are sent to X11, and it works really bad with other games,
+    because of the way the keys are sent to X11.
+
+    Requires 'X11::GUITest', install with 'sudo cpan X11::GUITest'.
+
