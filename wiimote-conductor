@@ -20,8 +20,8 @@ my $debounce = 0;
 my $addr = $ARGV[0];
 
 if (not defined $addr or $addr !~ m{^\w\w:\w\w:\w\w:\w\w:\w\w:\w\w$}) {
-	print STDERR "Usage: $0 <wiimote_addr>\n";
-	print STDERR "Example: $0 00:1F:12:34:56:78\n\n";
+	print STDERR "Usage: $0 <wiimote_addr> <movie-or-audio-file>\n";
+	print STDERR "Example: $0 00:1F:12:34:56:78 matrix.mpg\n\n";
 	print STDERR "If you don't know the address of your wiimote, use:\n\n";
 	print STDERR "  hcitool scan\n\n";
 	print STDERR "to find out.\n";
@@ -30,7 +30,7 @@ if (not defined $addr or $addr !~ m{^\w\w:\w\w:\w\w:\w\w:\w\w:\w\w$}) {
 
 wiimote::init($addr) or die "Can't init wiimote connection";
 
-$player->load('your-movie-music-file-here');
+$player->load($ARGV[1] || 'your-movie-music-file-here');
 
 while (my $motion = wiimote::get_motion()) {
 
