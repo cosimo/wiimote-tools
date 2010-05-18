@@ -121,16 +121,21 @@ sub get_motion {
 
 sub init {
 
+	my ($wiimote_addr) = @_;
+
 	if (! $HAVE_WIIMOTE) {
-		Carp::croak('No Wiimote support');
+		Carp::croak('No Wiimote support?');
+	}
+
+	if (! $wiimote_addr) {
+		Carp::croak(q{Usage: wiimote::init('00:1F:12:34:56:78'). Find your wiimote address with 'hcitool scan'});
 	}
 
 	my $wii = Linux::Input::Wiimote->new();
-	my $addr = '00:1F:C5:06:5E:BB';
 
-	my $connect = $wii->wiimote_connect($addr);
+	my $connect = $wii->wiimote_connect($wiimote_addr);
 	if ($connect == -1 ) {
-		Carp::croak("Can't connect to Wiimote at $addr");
+		Carp::croak("Can't connect to Wiimote at $wiimote_addr");
 	}
 
 	# Init wiimote to receive appropriate sensors data
